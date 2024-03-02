@@ -2,8 +2,6 @@ from flask_login import UserMixin
 from ..utils import db
 from marshmallow import Schema, fields, ValidationError, validate
 
-import re
-
 
 
 class User(db.Model, UserMixin):
@@ -14,7 +12,7 @@ class User(db.Model, UserMixin):
     def __repr__(self):
         return '<User {}>'.format(self.username)
 
-class LoginRequestBody(Schema):
+class RegisterRequestBody(Schema):
     email = fields.Email()
     password = fields.Str(
         required=True,
@@ -22,4 +20,9 @@ class LoginRequestBody(Schema):
             r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$',
             error='Password must have at least 8 characters, one uppercase letter, one lowercase letter, and one digit.'
         )
+    )
+class LoginRequestBody(Schema):
+    email = fields.Email(required=True)
+    password = fields.Str(
+        required=True
     )
