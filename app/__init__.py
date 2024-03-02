@@ -15,12 +15,16 @@ def create_app():
     app.config.from_object(Config)
 
     login_manager = LoginManager()
+    login_manager.login_message = "User needs to be logged in to view this page"
     login_manager.init_app(app)
 
     @login_manager.user_loader
-    def load_user(user_id):
-        # Esta função é usada para carregar o usuário com base no ID do usuário armazenado na sessão
-        return User.query.get(int(user_id))
+    def user_loader(user_id):
+        user = User.query.filter_by(id=user_id).first()
+        if user:
+            return user
+        return None
+
 
     db.init_app(app)
 

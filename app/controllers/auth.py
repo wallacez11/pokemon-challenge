@@ -3,7 +3,6 @@ from flask_login import  login_user, logout_user
 from ..models.models import *
 from sqlalchemy.exc import IntegrityError
 import bcrypt
-from flask_login import LoginManager
 
 auth_bp = Blueprint('auth', __name__)
 
