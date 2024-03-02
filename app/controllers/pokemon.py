@@ -31,7 +31,7 @@ def make_http_request(resource, method):
 
         # Monta o objeto de retorno com a resposta, o código de status e a mensagem de erro
         return {
-            'data': response.json() if response.status_code == 200 else  [],
+            'data': response.json() if response.status_code == 200 else None,
             'status_code': response.status_code,
             'error_message': '' 
         }
@@ -78,15 +78,46 @@ def get_random_pokemon_by_type(type):
     if response['error_message']:
         return jsonify({'error': response['error_message']}), 500 
     
-    if response['data'] and 'pokemon' in response['data']:
+    if  response['data']['pokemon'] in response['data']:
         pokemon_list = response['data']['pokemon']
         if pokemon_list:
             random_pokemon = random.choice(pokemon_list)
             pokemon_name = random_pokemon['pokemon']['name']
             return jsonify({'pokemon': pokemon_name}), response['status_code']
+    else:
+        return jsonify({'message': HTTPStatus(int(response['status_code'])).phrase}), response['status_code']
+
+
+@pokemon_bp.route('/app/pokemon/long/<type>', methods=['GET'])
+@login_required
+def get_longest_name_pokemon_by_type(type):
+    if not type:
+        return jsonify({'error': 'Pokemon type cannot be empty'}), 400
+
+    resource = f"type/{type}"
+    method = "GET"
+    
+    response = make_http_request(resource, method)
+
+    if response['error_message']:
+        return jsonify({'error': response['error_message']}), 500 
+    
+    if response['data'] and 'pokemon' in response['data']:
+        pokemon_list = response['data']['pokemon']
+        if pokemon_list:
+            longest_pokemon = find_longest_pokemon(pokemon_list)
+            if longest_pokemon:
+                return jsonify({'longest_pokemon': longest_pokemon}), response['status_code']
     
     return jsonify({'message': HTTPStatus(response['status_code']).phrase}), response['status_code']
 
-
-   
+def find_longest_pokemon(pokemon_list):
+    longest_pokemon = None
+    max_length = 0
+    for pokemon in pokemon_list:
+        pokemon_name = pokemon['pokemon']['name']
+        if len(pokemon_name) > max_length:
+            max_length = len(pokemon_name)
+            longest_pokemon = pokemon_name
+    return longest_pokemon 
 
