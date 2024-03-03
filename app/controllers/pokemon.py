@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, current_app
 from flask_login import login_required
+from .weather import get_current_weather, get_lat_lng, get_pokemon_type_by_temperature
 from http import HTTPStatus
 
 import requests
@@ -77,8 +78,8 @@ def get_random_pokemon_by_type(type):
 
     if response['error_message']:
         return jsonify({'error': response['error_message']}), 500 
-    
-    if  response['data']['pokemon'] in response['data']:
+
+    if  response['data'] and 'pokemon' in response['data']:
         pokemon_list = response['data']['pokemon']
         if pokemon_list:
             random_pokemon = random.choice(pokemon_list)
@@ -110,6 +111,30 @@ def get_longest_name_pokemon_by_type(type):
                 return jsonify({'longest_pokemon': longest_pokemon}), response['status_code']
     
     return jsonify({'message': HTTPStatus(response['status_code']).phrase}), response['status_code']
+
+@pokemon_bp.route('/app/pokemon/iam', methods=['GET'])
+@login_required
+def get_random_pokemon_by_weather():
+    type = get_pokemon_type_by_temperature()
+    if not type:
+        return jsonify({'error': 'Pokemon type cannot be empty'}), 400
+
+    resource = f"type/{type}"
+    method = "GET"
+    
+    response = make_http_request(resource, method)
+
+    if response['error_message']:
+        return jsonify({'error': response['error_message']}), 500 
+    
+    if response['data'] and 'pokemon' in response['data']:
+        pokemon_list = response['data']['pokemon']
+        filtered_pokemon = [pokemon['pokemon'] for pokemon in pokemon_list if any(letter in pokemon['pokemon']['name'].lower() for letter in ['i', 'a', 'm'])]
+        if filtered_pokemon:
+            random_pokemon = random.choice(filtered_pokemon)
+            return jsonify({'pokemon': random_pokemon}), response.get('status_code', 200)
+    
+    return jsonify({'error': 'No Pokemon found with "I", "A" or "M" in its name'}), 404
 
 def find_longest_pokemon(pokemon_list):
     longest_pokemon = None
