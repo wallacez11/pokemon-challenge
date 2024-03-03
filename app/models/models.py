@@ -13,7 +13,7 @@ class User(db.Model, UserMixin):
         return '<User {}>'.format(self.username)
 
 class RegisterRequestBody(Schema):
-    email = fields.Email()
+    email = fields.Email(required=True)
     password = fields.Str(
         required=True,
         validate=validate.Regexp(
