@@ -11,7 +11,7 @@ auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/auth/register', methods=['POST'])
 def register():
-    schema = LoginRequestBody()  
+    schema = RegisterRequestBody()  
     errors = schema.validate(request.json)
     if errors:
         return errors, 422
