@@ -47,8 +47,8 @@ def configure_logger(app):
   
     file_handler = RotatingFileHandler(os.path.join(logs_dir, 'app.log'), maxBytes=10240, backupCount=10)
     file_handler.setFormatter(formatter)
-    file_handler.setLevel(logging.DEBUG)
+    file_handler.setLevel(logging.INFO)
     
     app.logger.addHandler(file_handler)
-    app.logger.setLevel(logging.DEBUG)
+    app.logger.setLevel(logging.INFO)
 
